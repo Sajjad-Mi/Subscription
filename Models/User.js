@@ -24,4 +24,13 @@ const findUserById = async (id) => {
    return result;
 }
 
-module.exports = {addUser, findUserById, createToken}
+const findUserByUsername = async (username) => {
+    const [result] = await connection.query(`
+        SELECT id, username, credit 
+        FROM users 
+        WHERE username = (?)
+    `, [username])
+   return result;
+}
+
+module.exports = {addUser, findUserById, createToken, findUserByUsername }
