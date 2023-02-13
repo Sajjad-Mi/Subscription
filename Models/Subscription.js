@@ -30,4 +30,44 @@ const subscribeToPlan = async (subsciption) => {
    
 }
 
-module.exports = {subscribeToPlan}
+//check if user subscription for a plan is active or inactive then toggle it
+const toggleSubscription = async (userId, planName) =>{
+    try {
+        let [userSubsResult] = await findSubscription(userId, planName)
+        let isActive = false;
+        let message = 'inactive';
+        if(userSubsResult.isActive == false){
+            isActive = true;
+            message = 'active';
+        }
+
+        const [Result] = await connection.query(`
+            UPDATE user_subs 
+            SET isActive = (?)
+            WHERE name = (?) and userId = (?);
+        `, [isActive, planName, userId]);
+
+        return Promise.resolve(`subsciption is now ${message}`);
+    } catch (error) {
+        console.log(error.message);
+        return Promise.reject(`${error.message}`);
+    }
+   
+}
+const findSubscription = async (userId, planName) =>{
+    try {
+        const [Result] = await connection.query(`
+            SELECT * 
+            FROM user_subs
+            WHERE name = (?) and userId = (?);
+        `, [planName, userId]);
+      
+        return Promise.resolve(Result);
+    } catch (error) {
+        console.log(error.message);
+        return Promise.reject(`${error.message}`);
+    }
+   
+}
+
+module.exports = {subscribeToPlan, toggleSubscription}
