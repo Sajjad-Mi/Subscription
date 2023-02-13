@@ -1,4 +1,5 @@
 const connection = require('../db');
+const invoiceModel = require('./Invoice');
 
 //find duration of subsciption Plan then
 //calculate start date and end date of user subsciption
@@ -21,6 +22,15 @@ const subscribeToPlan = async (subsciption) => {
             VALUES (?, ?, ?, ?, true)
         `, [subsciption.planName, subsciption.userId, startTimeResult[0].startTime, endTimeResult[0].endTime]);
 
+        let  isCreditSync = await invoiceModel.syncCredit(subsciption.planName, subsciption.userI)
+        if(isCreditSync){
+            invoiceModel.generateInvoice({
+                planName: subsciption.planName,
+                userId: subsciption.userId
+            })
+        }
+    
+        
        return Promise.resolve("subsciption added");
     } catch (error) {
         console.log(error.message);
@@ -29,6 +39,7 @@ const subscribeToPlan = async (subsciption) => {
    
    
 }
+
 
 //check if user subscription for a plan is active or inactive then toggle it
 const toggleSubscription = async (userId, planName) =>{

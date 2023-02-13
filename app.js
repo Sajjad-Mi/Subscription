@@ -7,6 +7,8 @@ const subscriptionRoutes = require('./Routes/Subscription')
 const userTable = require('./Models/UserSchema');
 const subsPlanTable = require('./Models/SubscriptionPlansSchema');
 const subsUserTable = require('./Models/UserSubscriptionSchema');
+const invoiceTable = require('./Models/InvoiceSchema');
+
 const {checkAuthorization} = require('./middleware/Auth')
 
 const cookieParser = require('cookie-parser');
@@ -23,7 +25,8 @@ const main = async () =>{
     const createUserTable = await connection.query(userTable);
     const createSubsTable = await connection.query(subsPlanTable);
     const createUserSubsTable = await connection.query(subsUserTable);
-  
+    const createInvoiceTable = await connection.query(invoiceTable);
+
     app.listen(PORT, () => console.log(`server listening in port ${PORT}`));
   } catch (err) {
     console.log(err.message)
