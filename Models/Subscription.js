@@ -22,7 +22,7 @@ const subscribeToPlan = async (subsciption) => {
             VALUES (?, ?, ?, ?, true)
         `, [subsciption.planName, subsciption.userId, startTimeResult[0].startTime, endTimeResult[0].endTime]);
 
-        let  isCreditSync = await invoiceModel.syncCredit(subsciption.planName, subsciption.userI)
+        let  isCreditSync = await invoiceModel.syncCredit(subsciption.planName, subsciption.userId);
         if(isCreditSync){
             invoiceModel.generateInvoice({
                 planName: subsciption.planName,
