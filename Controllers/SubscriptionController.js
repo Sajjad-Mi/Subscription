@@ -22,3 +22,15 @@ module.exports.toggle_patch = async (req , res) =>{
         res.status(400).json({ error });
     }
 }
+
+module.exports.subscription_get = async (req , res) =>{
+    try {
+        const result = await SubsModel.findUserSubscription(req.id);
+        
+        res.json({ result });
+    
+    } catch (error) {
+        console.log(error)
+        res.status(400).json({ error });
+    }
+}

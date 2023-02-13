@@ -81,4 +81,20 @@ const findSubscription = async (userId, planName) =>{
    
 }
 
-module.exports = {subscribeToPlan, toggleSubscription}
+const findUserSubscription = async (userId) =>{
+    try {
+        const [Result] = await connection.query(`
+            SELECT * 
+            FROM user_subs
+            where (?)
+        `, [userId]);
+      
+        return Promise.resolve(Result);
+    } catch (error) {
+        console.log(error.message);
+        return Promise.reject(`${error.message}`);
+    }
+   
+}
+
+module.exports = {subscribeToPlan, toggleSubscription, findUserSubscription}
