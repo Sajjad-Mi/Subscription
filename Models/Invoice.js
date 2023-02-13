@@ -71,4 +71,23 @@ const syncCredit = async (planName, userId) =>{
     }
 }
 
-module.exports = {generateInvoice, syncCredit}
+
+const getAllUserInvoice = async (userId)=>{
+    try {
+        const [allUserInvoice] = await connection.query(`
+            SELECT invoice.name, startTime, endTime, price
+            FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
+            where invoice.userId=(?)
+        `, userId);
+        const [[total]] = await connection.query(`
+            SELECT SUM(price) as total
+            FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
+            where invoice.userId=(?)
+        `, userId);
+        return {allUserInvoice, total};
+    } catch (error) {
+        console.log(error);
+
+    }
+}
+module.exports = {generateInvoice, syncCredit, getAllUserInvoice}

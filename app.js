@@ -3,7 +3,9 @@ const app = express();
 const connection = require('./db');
 
 const authRoutes = require('./Routes/Auth');
-const subscriptionRoutes = require('./Routes/Subscription')
+const subscriptionRoutes = require('./Routes/Subscription');
+const invoiceRoutes = require('./Routes/Invoice');
+
 const userTable = require('./Models/UserSchema');
 const subsPlanTable = require('./Models/SubscriptionPlansSchema');
 const subsUserTable = require('./Models/UserSubscriptionSchema');
@@ -38,3 +40,4 @@ main();
 
 app.use(authRoutes);
 app.use(checkAuthorization, subscriptionRoutes);
+app.use(checkAuthorization, invoiceRoutes);
