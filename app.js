@@ -38,6 +38,19 @@ const main = async () =>{
 
 main();
 
+app.post('/AddSubscriptionPlan', async (req, res) => {
+  try {
+    await connection.query(`
+    INSERT INTO subscription_plan(name, duration, price)
+    VALUES ((?), (?), (?));
+    `, [req.body.name, req.body.duration, req.body.price]);
+    res.json({message: "plan added"});
+    
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 app.use(authRoutes);
 app.use(checkAuthorization, subscriptionRoutes);
 app.use(checkAuthorization, invoiceRoutes);
