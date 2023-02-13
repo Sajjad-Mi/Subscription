@@ -87,7 +87,26 @@ const getAllUserInvoice = async (userId)=>{
         return {allUserInvoice, total};
     } catch (error) {
         console.log(error);
-
     }
 }
-module.exports = {generateInvoice, syncCredit, getAllUserInvoice}
+
+//get user invoice based on date
+const getInvoice = async (userId, from, until)=>{
+    try {
+        const [allUserInvoice] = await connection.query(`
+            SELECT invoice.name, startTime, endTime, price
+            FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
+            where startTime BETWEEN (?) AND (?) AND invoice.userId=(?)
+        `, [from, until, userId]);
+        const [[total]] = await connection.query(`
+                SELECT SUM(price) as total
+                FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
+                where startTime BETWEEN (?) AND (?) AND invoice.userId=(?)
+            `, [from, until, userId]);
+            
+        return {allUserInvoice, total};
+    } catch (error) {
+        console.log(error);
+    }
+}
+module.exports = {generateInvoice, syncCredit, getAllUserInvoice, getInvoice}
