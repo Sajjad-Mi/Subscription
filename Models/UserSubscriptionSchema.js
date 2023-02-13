@@ -8,7 +8,7 @@ const subsUserTable = `
         isActive BOOLEAN Not NULL,
         PRIMARY KEY (name, userId),
         FOREIGN KEY (userId) REFERENCES users(id),
-        FOREIGN KEY (userId) REFERENCES users(id)
+        FOREIGN KEY (name) REFERENCES subscription_plan(name)
     );
 `
 module.exports = subsUserTable;
