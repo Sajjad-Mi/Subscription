@@ -7,7 +7,7 @@ const checkAuthorization = (req, res , next)=>{
         jwt.verify(token, process.env.JWT_SECRET, (err, decode)=>{
             if(err){
                 console.log(err)
-                res.redirect("/login")
+                res.status(401).json("you don't have authorization");
             } else{
                 req.id = decode.id
                 req.username = decode.username
@@ -15,7 +15,7 @@ const checkAuthorization = (req, res , next)=>{
             }
         })
     } else{
-        res.redirect("/login");
+        res.status(401).json("you don't have authorization");
     }
 }
 
