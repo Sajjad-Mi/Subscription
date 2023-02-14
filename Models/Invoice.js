@@ -3,7 +3,7 @@ let isCreditSync;
 
 const generateInvoice = async (invoice)=>{
     try {
-        console.log(invoice)
+       
         const firstInvoiceResult = await connection.query(`
             INSERT INTO invoice(name, userId, startSubTime, startTime, endTime)
             VALUES (?, ?, ?, CURRENT_TIMESTAMP(), ADDDATE( CURRENT_TIMESTAMP(), INTERVAL +10 MINUTE))
@@ -15,6 +15,9 @@ const generateInvoice = async (invoice)=>{
    
 
 }
+
+//check every 8s then generate invoice for users that 10min past
+//from their last invoice and subscription is active
 const generateInvoiceInterval = setInterval(async ()=> {
     try {
         const [invoiceArray] = await connection.query(`
