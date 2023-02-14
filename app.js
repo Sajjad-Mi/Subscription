@@ -50,6 +50,18 @@ app.post('/AddSubscriptionPlan', async (req, res) => {
     res.status(400).json({ message: error.message });
   }
 });
+app.post('/AddCredit', checkAuthorization, async (req, res) => {
+  try {
+    await connection.query(`
+      UPDATE users
+      SET credit = credit + (?)
+      WHERE id = (?)
+      `, [req.body.credit, req.id]);
+      res.json({message: "credit increased"});
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
 
 app.use('/api/Auth/', authRoutes);
 app.use('/api/Subscription/', checkAuthorization, subscriptionRoutes);
