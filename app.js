@@ -31,7 +31,7 @@ const main = async () =>{
 
     app.listen(PORT, () => console.log(`server listening in port ${PORT}`));
   } catch (err) {
-    console.log(err.message)
+    console.log(err)
   }
  
 }

@@ -3,11 +3,11 @@ let isCreditSync;
 
 const generateInvoice = async (invoice)=>{
     try {
-        
+        console.log(invoice)
         const firstInvoiceResult = await connection.query(`
-            INSERT INTO invoice(name, userId, startTime, endTime)
-            VALUES (?, ?, CURRENT_TIMESTAMP(), ADDDATE( CURRENT_TIMESTAMP(), INTERVAL +10 MINUTE))
-        `, [invoice.planName, invoice.userId]);
+            INSERT INTO invoice(name, userId, startSubTime, startTime, endTime)
+            VALUES (?, ?, ?, CURRENT_TIMESTAMP(), ADDDATE( CURRENT_TIMESTAMP(), INTERVAL +10 MINUTE))
+        `, [invoice.planName,  invoice.userId, invoice.startSubTime]);
         console.log(firstInvoiceResult)
     } catch (error) {
         console.log(error)
@@ -18,10 +18,10 @@ const generateInvoice = async (invoice)=>{
 const generateInvoiceInterval = setInterval(async ()=> {
     try {
         const [invoiceArray] = await connection.query(`
-            SELECT invoice.name, invoice.userId,TIMEDIFF(CURRENT_TIMESTAMP(), max(invoice.endTime))>0 as isDueReached
+            SELECT invoice.name, invoice.userId, invoice.startSubTime, TIMEDIFF(CURRENT_TIMESTAMP(), max(invoice.endTime))>0 as isDueReached
             FROM invoice inner join user_subs
             WHERE invoice.name=user_subs.name and invoice.userId = user_subs.userId and user_subs.isActive = true
-            group by invoice.name, invoice.userId
+            group by invoice.name, invoice.userId, invoice.startSubTime
         `);
        
 
@@ -29,7 +29,7 @@ const generateInvoiceInterval = setInterval(async ()=> {
             if(invoice.isDueReached ){
                 isCreditSync = await syncCredit(invoice.name, invoice.userId)
                 if(isCreditSync){
-                    generateInvoice({planName: invoice.name, userId: invoice.userId})
+                    generateInvoice({planName: invoice.name, userId: invoice.userId, startSubTime: invoice.startSubTime})
                 }
             }
         });
@@ -75,7 +75,7 @@ const syncCredit = async (planName, userId) =>{
 const getAllUserInvoice = async (userId)=>{
     try {
         const [allUserInvoice] = await connection.query(`
-            SELECT invoice.name, startTime, endTime, price
+            SELECT invoice.name, startSubTime, startTime, endTime, price
             FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
             where invoice.userId=(?)
         `, userId);
@@ -94,7 +94,7 @@ const getAllUserInvoice = async (userId)=>{
 const getInvoice = async (userId, from, until)=>{
     try {
         const [allUserInvoice] = await connection.query(`
-            SELECT invoice.name, startTime, endTime, price
+            SELECT invoice.name, startSubTime, startTime, endTime, price
             FROM invoice INNER JOIN subscription_plan on invoice.name=subscription_plan.name
             where startTime BETWEEN (?) AND (?) AND invoice.userId=(?)
         `, [from, until, userId]);

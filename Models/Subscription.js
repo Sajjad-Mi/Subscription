@@ -5,28 +5,29 @@ const invoiceModel = require('./Invoice');
 //calculate start date and end date of user subsciption
 const subscribeToPlan = async (subsciption) => {
     try {
-        const [duResult] = await connection.query(`
+        const [[duResult]] = await connection.query(`
             SELECT duration 
             FROM subscription_plan
             WHERE name = (?);
         `, [subsciption.planName]);
 
-        const [startTimeResult] = await connection.query(`
+        const [[startTimeResult]]= await connection.query(`
             SELECT CURRENT_TIMESTAMP() AS startTime`);
 
-        const [endTimeResult] = await connection.query(`
-            SELECT  ADDDATE( CURRENT_TIMESTAMP(), INTERVAL +${duResult[0].duration} MONTH) AS endTime;`);
+        const [[endTimeResult]] = await connection.query(`
+            SELECT  ADDDATE( CURRENT_TIMESTAMP(), INTERVAL +${duResult.duration} MONTH) AS endTime;`);
 
         const subsResult = await connection.query(`
             INSERT INTO user_subs(name, userId, startTime, endTime, isActive)
             VALUES (?, ?, ?, ?, true)
-        `, [subsciption.planName, subsciption.userId, startTimeResult[0].startTime, endTimeResult[0].endTime]);
+        `, [subsciption.planName, subsciption.userId, startTimeResult.startTime, endTimeResult.endTime]);
 
         let  isCreditSync = await invoiceModel.syncCredit(subsciption.planName, subsciption.userId);
         if(isCreditSync){
             invoiceModel.generateInvoice({
                 planName: subsciption.planName,
-                userId: subsciption.userId
+                userId: subsciption.userId,
+                startSubTime: startTimeResult.startTime
             })
         }
     
@@ -42,9 +43,9 @@ const subscribeToPlan = async (subsciption) => {
 
 
 //check if user subscription for a plan is active or inactive then toggle it
-const toggleSubscription = async (userId, planName) =>{
+const toggleSubscription = async (userId, planName, startSubTime) =>{
     try {
-        let [userSubsResult] = await findSubscription(userId, planName)
+        let [userSubsResult] = await findSubscription(userId, planName, startSubTime)
         let isActive = false;
         let message = 'inactive';
         if(userSubsResult.isActive == false){
@@ -55,8 +56,8 @@ const toggleSubscription = async (userId, planName) =>{
         const [Result] = await connection.query(`
             UPDATE user_subs 
             SET isActive = (?)
-            WHERE name = (?) and userId = (?);
-        `, [isActive, planName, userId]);
+            WHERE name = (?) and userId = (?) and startSubTime = (?);
+        `, [isActive, planName, userId, startSubTime]);
 
         return Promise.resolve(`subsciption is now ${message}`);
     } catch (error) {
@@ -65,13 +66,13 @@ const toggleSubscription = async (userId, planName) =>{
     }
    
 }
-const findSubscription = async (userId, planName) =>{
+const findSubscription = async (userId, planName, startSubTime) =>{
     try {
         const [Result] = await connection.query(`
             SELECT * 
             FROM user_subs
-            WHERE name = (?) and userId = (?);
-        `, [planName, userId]);
+            WHERE name = (?) and userId = (?) and startSubTime = (?);
+        `, [planName, userId, startSubTime]);
       
         return Promise.resolve(Result);
     } catch (error) {
@@ -86,7 +87,7 @@ const findUserSubscription = async (userId) =>{
         const [Result] = await connection.query(`
             SELECT * 
             FROM user_subs
-            where (?)
+            where userId=(?)
         `, [userId]);
       
         return Promise.resolve(Result);
