@@ -51,6 +51,6 @@ app.post('/AddSubscriptionPlan', async (req, res) => {
   }
 });
 
-app.use(authRoutes);
-app.use(checkAuthorization, subscriptionRoutes);
-app.use(checkAuthorization, invoiceRoutes);
+app.use('/api/Auth/', authRoutes);
+app.use('/api/Subscription/', checkAuthorization, subscriptionRoutes);
+app.use('/api/',checkAuthorization, invoiceRoutes);
