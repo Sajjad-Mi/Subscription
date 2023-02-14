@@ -6,7 +6,7 @@ const subsUserTable = `
         startTime TIMESTAMP  NOT NULL,
         endTime TIMESTAMP  NOT NULL,
         isActive BOOLEAN Not NULL,
-        PRIMARY KEY (name, userId),
+        PRIMARY KEY (name, userId, startTime),
         FOREIGN KEY (userId) REFERENCES users(id),
         FOREIGN KEY (name) REFERENCES subscription_plan(name)
     );
