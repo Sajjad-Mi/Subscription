@@ -41,27 +41,39 @@ const subscribeToPlan = async (subsciption) => {
    
 }
 
-
-//check if user subscription for a plan is active or inactive then toggle it
+//check user subscription due 
+//then check for a plan is active or inactive then toggle it
 const toggleSubscription = async (userId, planName, startSubTime) =>{
     try {
-        let [userSubsResult] = await findSubscription(userId, planName, startSubTime)
         let isActive = false;
         let message = 'inactive';
-        if(userSubsResult.isActive == false){
-            isActive = true;
-            message = 'active';
-        }
+        let [[resultUserSub]] = await connection.query(`
+            SELECT TIMEDIFF(CURRENT_TIMESTAMP(), endTime)>0 as isDueReached 
+            FROM user_subs
+            WHERE name = (?) AND userId = (?) AND startTime = (?);
+        `, [planName, userId, startSubTime]);
+        if(!resultUserSub.isDueReached){
+            console.log(resultUserSub)
+            let [userSubsResult] = await findSubscription(userId, planName, startSubTime)
+        
+            if(userSubsResult.isActive == false){
+                isActive = true;
+                message = 'active';
+            }
 
+        }else{
+            let message = 'Subscription due date is reached';
+        }
         const [Result] = await connection.query(`
             UPDATE user_subs 
             SET isActive = (?)
-            WHERE name = (?) and userId = (?) and startSubTime = (?);
+            WHERE name = (?) and userId = (?) and startTime = (?);
         `, [isActive, planName, userId, startSubTime]);
 
-        return Promise.resolve(`subsciption is now ${message}`);
+    return Promise.resolve(`subsciption is now ${message}`);
+      
     } catch (error) {
-        console.log(error.message);
+        console.log(error);
         return Promise.reject(`${error.message}`);
     }
    
@@ -71,7 +83,7 @@ const findSubscription = async (userId, planName, startSubTime) =>{
         const [Result] = await connection.query(`
             SELECT * 
             FROM user_subs
-            WHERE name = (?) and userId = (?) and startSubTime = (?);
+            WHERE name = (?) and userId = (?) and startTime = (?);
         `, [planName, userId, startSubTime]);
       
         return Promise.resolve(Result);

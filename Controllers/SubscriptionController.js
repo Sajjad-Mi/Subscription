@@ -14,7 +14,7 @@ module.exports.subscribe_get = async (req , res) =>{
 
 module.exports.toggle_patch = async (req , res) =>{
     try {
-        const message = await SubsModel.toggleSubscription(req.id, req.body.planName);
+        const message = await SubsModel.toggleSubscription(req.id, req.body.planName, req.body.startTime);
         res.json({ message });
     
     } catch (error) {
